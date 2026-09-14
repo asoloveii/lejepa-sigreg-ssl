@@ -8,11 +8,13 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "pytest>=9.1.1",
     "torch>=2.14.0",
+    "torchvision>=0.29.0",
 ]
 
-[project.scripts]
-lejepa-sigreg-ssl = "lejepa_sigreg_ssl:main"
+[tool.uv]
+package = false
 
 [build-system]
 requires = ["uv_build>=0.12.13,<0.13.0"]
