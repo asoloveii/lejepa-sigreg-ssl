@@ -1,0 +1,22 @@
+seed: 42
+epochs: 800
+ckpt_every: 100
+ckpt_path: null
+ckpt_dir: "ckpts/vit_tiny_inet10"
+lamd: 0.02
+lr: 2e-3
+
+model:
+  arch: "vit"
+  size: "tiny"
+  dim: 192
+  proj_dim: 32
+  n_proj: 256
+  patch_size: 8
+
+data:
+  dataset_name: "frgfm/imagenette"
+  batch_size: 256
+  V: 4
+  n_classes: 10
+  num_workers: 8
