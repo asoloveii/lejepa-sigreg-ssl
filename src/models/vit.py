@@ -178,10 +178,7 @@ class ViT(nn.Module):
         for block in self.blocks:
             x = block(x, self.rope_embs)
 
-        if return_only_cls:
-            return x[:, 0, :]
-        
-        return x
+        return x[:, 0, :]
 
 
 def vit_tiny(patch_size=8, **kwargs):
