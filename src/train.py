@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from data import HFDataset
-from src.models import Encoder, SIGReg
+from models import Encoder, SIGReg
 
 from utils import setup_ddp, get_backbone, load_checkpoint, save_checkpoint
 
@@ -111,7 +111,7 @@ def train(cfg: OmegaConf):
         all_reduce(correct, op=ReduceOp.SUM)
 
         if rank == 0:
-            wandb.log({"val/accuracy": correct/len(val_ds), "val/epoch": epoch})
+            wandb.log({"val/accuracy": correct/len(val_ds)})
 
         if rank == 0 and ((epoch+1) % cfg.ckpt_every or (epoch+1) == cfg.epochs):
             save_checkpoint(cfg.ckpt_dir, encoder, probe, scaler, optimizer, scheduler, epoch)

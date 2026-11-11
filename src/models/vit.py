@@ -31,11 +31,11 @@ class Derf(nn.Module):
     def __init__(self, d_model, init_shift, init_scale):
         super().__init__()
 
-        self.shift = nn.Parameter(torch.ones(1)*init_shift, requires_grad=True)
-        self.scale = nn.Parameter(torch.ones(1)*init_scale, requires_grad=True)
+        self.shift = nn.Parameter(torch.ones(1, requires_grad=True)*init_shift)
+        self.scale = nn.Parameter(torch.ones(1, requires_grad=True)*init_scale)
 
-        self.gamma = nn.Parameter(torch.ones(d_model), requires_grad=True)
-        self.beta = nn.Parameter(torch.zeros(d_model), requires_grad=True)
+        self.gamma = nn.Parameter(torch.ones(d_model, requires_grad=True))
+        self.beta = nn.Parameter(torch.zeros(d_model, requires_grad=True))
 
     def forward(self, x: torch.Tensor):
         return self.gamma * torch.erf(self.shift * x + self.scale) + self.beta
@@ -168,7 +168,7 @@ class ViT(nn.Module):
             persistent=False
         )
 
-    def forward(self, x: torch.Tensor, return_only_cls=False):
+    def forward(self, x: torch.Tensor, return_cls_only=True):
         B = x.shape[0]
 
         x = self.patch_embedding(x)
@@ -178,7 +178,10 @@ class ViT(nn.Module):
         for block in self.blocks:
             x = block(x, self.rope_embs)
 
-        return x[:, 0, :]
+        if return_cls_only:
+            return x[:, 0, :]
+
+        return x
 
 
 def vit_tiny(patch_size=8, **kwargs):
