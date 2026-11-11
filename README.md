@@ -38,8 +38,11 @@ This repository features custom, ground-up implementations of modern vision back
 
 ## Linear Probe across models and datasets
 
-Both **ViT-Tiny** and **ConvNeXtV2-Femto** architectures are pretrained and evaluated across four distinct datasets:
-To be done...
+Here is the training loss curve for the LeJEPA ViT-Tiny model trained for 400 epochs on Imagenette:
+
+![SIGReg loss curve](assets/sigreg.png)
+![Invariance loss curve](assets/inv.png)
+![Online linear probe accuracy](assets/val_accuracy.png)
 
 ---
 
