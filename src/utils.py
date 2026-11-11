@@ -2,7 +2,7 @@ import os
 import torch
 from torch.distributed import init_process_group
 
-from models import *
+from .models import *
 
 
 def setup_ddp():
@@ -21,8 +21,8 @@ def load_checkpoint(ckpt_path, encoder, probe, optimizer, scheduler, scaler, dev
 
     checkpoint = torch.load(ckpt_path, map_location=device)
 
-    encoder.module._orig_mod.load_state_dict(checkpoint["encoder"])
-    probe.module._orig_mod.load_state_dict(checkpoint["probe"])
+    encoder.module.load_state_dict(checkpoint["encoder"])
+    probe.module.load_state_dict(checkpoint["probe"])
 
     optimizer.load_state_dict(checkpoint["optimizer"])
     scheduler.load_state_dict(checkpoint["scheduler"])
@@ -37,8 +37,8 @@ def save_checkpoint(ckpt_dir, encoder, probe, optimizer, scheduler, scaler, epoc
 
     state = {
         "epoch": epoch,
-        "encoder": encoder.module._orig_mod.state_dict(),
-        "probe": probe.module._orig_mod.state_dict(),
+        "encoder": encoder.module.state_dict(),
+        "probe": probe.module.state_dict(),
         "optimizer": optimizer.state_dict(),
         "scheduler": scheduler.state_dict(),
         "scaler": scaler.state_dict(),

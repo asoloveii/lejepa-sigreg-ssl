@@ -19,7 +19,8 @@ from utils import setup_ddp, get_backbone, load_checkpoint, save_checkpoint
 def train(cfg: OmegaConf):
     rank, local_rank, world_size, device = setup_ddp()
 
-    wandb.init(project="LeJEPA", config=OmegaConf.to_container(cfg))
+    if rank == 0:
+        wandb.init(project="LeJEPA", config=OmegaConf.to_container(cfg))
     
     torch.manual_seed(cfg.seed+rank)
 
@@ -48,7 +49,6 @@ def train(cfg: OmegaConf):
     probe = DDP(probe, device_ids=[local_rank], output_device=local_rank)
 
     sigreg = SIGReg(cfg.model.n_proj).to(device)
-    sigreg = DDP(sigreg, device_ids=[local_rank], output_device=local_rank)
 
     g1 = {"params": encoder.parameters(), "lr": cfg.lr, "weight_decay": 5e-2}
     g2 = {"params": probe.parameters(), "lr": 1e-3, "weight_decay": 1e-7}
@@ -106,14 +106,15 @@ def train(cfg: OmegaConf):
                 xs, ys = xs.to(device), ys.to(device)
                 with torch.autocast(device_type=device.type, dtype=torch.bfloat16):
                     embs, _ = encoder(xs)
-                    correct += (probe(embs).argmax(1), ys).sum().item()
+                    correct += (probe(embs).argmax(1) == ys).sum().item()
 
         all_reduce(correct, op=ReduceOp.SUM)
 
         if rank == 0:
-            wandb.log({"val/accuracy": correct/len(val_ds)})
+            total_val_samples = len(val_ds) * world_size
+            wandb.log({"val/accuracy": correct.item() / total_val_samples})
 
-        if rank == 0 and ((epoch+1) % cfg.ckpt_every or (epoch+1) == cfg.epochs):
+        if rank == 0 and (((epoch + 1) % cfg.ckpt_every == 0) or ((epoch + 1) == cfg.epochs)):
             save_checkpoint(cfg.ckpt_dir, encoder, probe, scaler, optimizer, scheduler, epoch)
 
     if rank == 0:
